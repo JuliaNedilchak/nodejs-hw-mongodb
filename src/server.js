@@ -1,7 +1,8 @@
 import cors from 'cors';
 import pino from 'pino-http';
 import express from 'express';
-import { Contact } from './db/contacts.js';
+//import { Contact } from './db/contacts.js';
+import { getAllCOntacts } from './services/contactRequest.js';
 
 //dotenv.config();
 
@@ -9,7 +10,7 @@ const PORT = Number(process.env.PORT) || 3000;
 
 export function setupServer() {
   const app = express();
-
+  app.use(cors());
   app.use(
     pino({
       transport: {
@@ -17,12 +18,12 @@ export function setupServer() {
       },
     }),
   );
-  app.use(cors());
+
   app.get('/contacts', async (req, res) => {
     try {
-      const contacts = await Contact.find();
+      const contacts = await getAllCOntacts();
       console.log(contacts);
-      res.send({ status: 200, data: contacts });
+      res.status(200).json({ data: contacts });
     } catch (error) {
       console.log(error);
     }
