@@ -17,8 +17,3 @@ export async function initMongoConnection() {
     console.log(error);
   }
 }
-//MONGODB_USER=JuliaDatabase
-
-//MONGODB_URL=cluster0.nzw4amg.mongodb.net
-//MONGODB_DB=contacts
-//mongodb+srv://JuliaDatabase:<password>@cluster0.nzw4amg.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
