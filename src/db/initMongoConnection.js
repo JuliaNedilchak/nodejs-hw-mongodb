@@ -13,7 +13,7 @@ export async function initMongoConnection() {
       `mongodb+srv://${user}:${psw}@${url}/${db}?retryWrites=true&w=majority&appName=Cluster0`,
     );
     console.log('"Mongo connection successfully established!');
-  } catch (error) {
-    console.log(error);
+  } catch (err) {
+    console.log(err);
   }
 }
