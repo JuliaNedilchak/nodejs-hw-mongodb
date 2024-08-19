@@ -18,6 +18,7 @@ export function setupServer() {
       },
     }),
   );
+  //app.use(express.json());
   app.use(contactsRouter);
 
   app.use('*', notFoundHandler);
