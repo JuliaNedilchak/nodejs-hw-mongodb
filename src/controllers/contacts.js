@@ -6,9 +6,13 @@ import {
   patchContact,
 } from '../services/contactRequest.js';
 import createHttpError from 'http-errors';
+import { parsePaginationParams } from '../utils/parsePaginationParams.js';
+import { parseSortParams } from '../utils/parseSortParams.js';
 
 export const getAllContactsController = async (req, res, next) => {
-  const contacts = await getAllCOntacts();
+  const { page, perPage } = parsePaginationParams(req.query);
+  const { sortBy, sortOrder } = parseSortParams(req.query);
+  const contacts = await getAllCOntacts({ page, perPage, sortBy, sortOrder });
   console.log(contacts);
   res.status(200).json({
     status: 200,
