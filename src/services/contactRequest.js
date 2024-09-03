@@ -1,7 +1,9 @@
 import { Contact } from '../db/contacts.js';
 
-export const getAllCOntacts = async ({ page, perPage, sortBy, sortOrder }) => {
+export const getAllCOntacts = async ({ page, perPage, sortBy, sortOrder ,parentId}) => {
   const skip = page > 0 ? (page - 1) * perPage : 0;
+  const contactQuery = Contact.find();
+  contactQuery.where('parentId').equels(parentId);
   const [contacts, count] = await Promise.all([
     Contact.find()
       .sort({ [sortBy]: sortOrder })
