@@ -4,7 +4,7 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import authRoutes from './routers/auth.js';
 import contactsRouter from './routers/contacts.js';
-import { auth } from './middlewares/auth.js';
+import { auth } from './middlewares/authenticate.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 
