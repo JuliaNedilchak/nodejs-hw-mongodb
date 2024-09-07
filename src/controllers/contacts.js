@@ -1,3 +1,5 @@
+import * as fs from 'node:fs/promises';
+
 import {
   getAllCOntacts,
   getContactById,
@@ -9,6 +11,7 @@ import createHttpError from 'http-errors';
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
 import { parseFilterParams } from '../utils/parseFilterParams.js';
+import { uploadToCloudinary } from '../utils/uploadToCloudinary.js';
 
 export const getAllContactsController = async (req, res, next) => {
   const { page, perPage } = parsePaginationParams(req.query);
@@ -48,12 +51,23 @@ export const getContactByIdController = async (req, res, next) => {
   });
 };
 export const CreateContactController = async (req, res) => {
+  let photo = null;
+
+  if (typeof req.file !== 'undefined') {
+    if (process.env.ENABLE_CLOUDINARY === 'true') {
+      const result = await uploadToCloudinary(req.file.path);
+      console.log(result);
+      await fs.unlink(req.file.path);
+      photo = result.secure_url;
+    }
+  }
   const contact = {
     name: req.body.name,
     phoneNumber: req.body.phoneNumber,
     email: req.body.email,
     contactType: req.body.contactType,
     parentId: req.user._id,
+    photo,
   };
   const createdContact = await createContact(contact);
   console.log({ createdContact });
@@ -76,7 +90,19 @@ export const deleteContactController = async (req, res, next) => {
 export const patchContactController = async (req, res, next) => {
   const { contactId } = req.params;
   const parentId = req.user._id;
-  const result = await patchContact(contactId, req.body, parentId);
+
+  let updatedData = { ...req.body };
+  let resultPhoto = null;
+
+  if (typeof req.file !== 'undefined') {
+    if (process.env.ENABLE_CLOUDINARY === 'true') {
+      resultPhoto = await uploadToCloudinary(req.file.path);
+      updatedData.photo = resultPhoto.secure_url;
+      await fs.unlink(req.file.path);
+    }
+  }
+
+  const result = await patchContact(contactId, updatedData, parentId);
   if (!result) {
     throw createHttpError(404, 'Contact is not found');
   }
