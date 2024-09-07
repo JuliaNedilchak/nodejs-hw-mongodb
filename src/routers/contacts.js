@@ -14,6 +14,7 @@ import {
   updateContactSchema,
 } from '../validation/contacts.js';
 import { isValidId } from '../middlewares/isValidId.js';
+import { upload } from '../middlewares/upload.js';
 
 const router = Router();
 const jsonParser = express.json();
@@ -27,6 +28,7 @@ router.get(
 router.post(
   '/contacts',
   jsonParser,
+  upload.single('photo'),
   validateBody(createContactSchema),
   ctrlWrapper(CreateContactController),
 );
@@ -39,6 +41,7 @@ router.patch(
   '/contacts/:contactId',
   isValidId,
   jsonParser,
+  upload.single('photo'),
   validateBody(updateContactSchema),
   ctrlWrapper(patchContactController),
 );
