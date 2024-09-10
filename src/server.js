@@ -7,11 +7,13 @@ import contactsRouter from './routers/contacts.js';
 import { auth } from './middlewares/authenticate.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
 import { errorHandler } from './middlewares/errorHandler.js';
+import { swaggerDocs } from './middlewares/swaggerDocs.js';
 
 const PORT = Number(process.env.PORT) || 3000;
 
 export function setupServer() {
   const app = express();
+  app.use('/api-docs', swaggerDocs());
 
   app.use(cors());
   app.use(
