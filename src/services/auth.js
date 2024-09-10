@@ -4,6 +4,7 @@ import { User } from '../db/user.js';
 import createHttpError from 'http-errors';
 import { Session } from '../db/session.js';
 import { sendMail } from '../utils/sendMail.js';
+import { validateCode } from '../utils/goodleOAuth2.js';
 import jwt from 'jsonwebtoken';
 import {
   ACCESS_TOKEN_TTL,
@@ -114,4 +115,41 @@ export async function resetPassword(password, token) {
     }
     throw error;
   }
+}
+
+export async function loginOrRegisterWithGoogle(code) {
+  const ticket = await validateCode(code);
+  const payload = ticket.getPayload();
+
+  if (typeof payload === 'undefined') {
+    throw createHttpError(401, 'Unauthorized');
+  }
+  const user = await User.findOne({ email: payload.email });
+  const password = await bcrypt.hash(
+    crypto.randomBytes(30).toString('base64'),
+    10,
+  );
+  if (user === null) {
+    const createdUser = await User.create({
+      email: payload.email,
+      name: payload.name,
+      password,
+    });
+    return Session.create({
+      userId: createdUser._id,
+      accessToken: crypto.randomBytes(30).toString('base64'),
+      refreshToken: crypto.randomBytes(30).toString('base64'),
+      accessTokenValidUntil: new Date(Date.now() + ACCESS_TOKEN_TTL),
+      refreshTokenValidUntil: new Date(Date.now() + REFRESH_TOKEN_TTL),
+    });
+  }
+  await Session.deleteOne({ userId: user._id });
+
+  return Session.create({
+    userId: user._id,
+    accessToken: crypto.randomBytes(30).toString('base64'),
+    refreshToken: crypto.randomBytes(30).toString('base64'),
+    accessTokenValidUntil: new Date(Date.now() + ACCESS_TOKEN_TTL),
+    refreshTokenValidUntil: new Date(Date.now() + REFRESH_TOKEN_TTL),
+  });
 }
